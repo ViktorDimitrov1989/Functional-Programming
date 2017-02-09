@@ -20,7 +20,6 @@ public class PrE09CustomComparator {
             }
         });
 
-
         for (Integer num: numbers){
             System.out.print(num + " ");
         }
