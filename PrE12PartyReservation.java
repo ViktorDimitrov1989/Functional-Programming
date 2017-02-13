@@ -16,47 +16,84 @@ public class PrE12PartyReservation {
         String input;
 
         ArrayList<Predicate<String>> predicates = new ArrayList<>();
-        BiFunction<String, String, Predicate<String>> function = (type,param) -> {
-          switch (type){
-              case "Starts with":
-                  return (s) -> s.startsWith(param);
-              case "Ends with":
-                  return (s) -> s.endsWith(param);
-              case "Length":
-                  return (s) -> s.length() == Integer.parseInt(String.valueOf(param));
-              default:
-                  return (s) -> s.contains(param);
-          }
+        BiFunction<String, String, Predicate<String>> function = (type, param) -> {
+            switch (type) {
+                case "Starts with":
+                    return (s) -> s.startsWith(param);
+                case "Ends with":
+                    return (s) -> s.endsWith(param);
+                case "Length":
+                    return (s) -> s.length() == Integer.parseInt(String.valueOf(param));
+                default:
+                    return (s) -> s.contains(param);
+            }
         };
 
-        BiConsumer<ArrayList<String>, ArrayList<Predicate<String>>> printer = (a,pred) -> {//TODO for each name test all predicates
-                for (String anA : a) {
-                    for (int i = 0; i < pred.size(); i++) {
-                        if (pred.get(i).test(anA)) {
-                            System.out.print(anA + " ");
-                        }
+        BiConsumer<ArrayList<String>, ArrayList<Predicate<String>>> printer = (namesList, pred) -> {
+            ArrayList<String> tmp = new ArrayList<>(namesList);
+            boolean isRemoved = false;
+            for (int i = 0; i < tmp.size(); i++) {
+                for (Predicate predicate : pred) {
+                    if(isRemoved){
+                        break;
+                    }
+                    String name = tmp.get(i);
+                    if (predicate.test(name)) {
+                        tmp.remove(i);
+                        i--;
+                        isRemoved = true;
                     }
                 }
+                isRemoved = false;
+            }
+            String result = tmp.stream().collect(Collectors.joining(" "));
+            System.out.println(result);
         };
 
-        while (!"Print".equals(input = reader.readLine())){
+        while (!"Print".equals(input = reader.readLine())) {
             String[] splittedCommands = input.split(";");
             String com = splittedCommands[0];
             String filterType = splittedCommands[1];
             String filterParam = splittedCommands[2];
 
-            switch (com){
+            switch (com) {
                 case "Add filter":
-                    predicates.add(function.apply(filterType,filterParam));
+                    predicates.add(function.apply(filterType, filterParam));
                     break;
                 case "Remove filter":
-                    predicates.remove(function.apply(filterType, filterParam));
+                    predicates = removePredicate(filterType,filterParam, predicates);
                     break;
                 default:
-                    printer.accept(names,predicates);
+                    printer.accept(names, predicates);
                     break;
             }
         }
-        printer.accept(names,predicates);
+        printer.accept(names, predicates);
+    }
+
+    private static ArrayList<Predicate<String>> removePredicate(String filterType,
+                                                                String filterParam,
+                                                                ArrayList<Predicate<String>> predicates) {
+        switch (filterType){
+            case "Starts with":
+                for (Predicate<String> predicate : predicates) {
+                    if(predicate.test(filterParam + "abc")){
+                        predicates.remove(predicate);
+                        break;
+                    }
+                }
+                break;
+            case "Ends with":
+                for (Predicate<String> predicate : predicates) {
+                    if(predicate.test("abc" + filterParam)){
+                        predicates.remove(predicate);
+                        break;
+                    }
+                }
+                break;
+            default:
+                predicates.remove(0);
+        }
+        return predicates;
     }
 }

@@ -11,17 +11,16 @@ public class PrE09CustomComparator {
 
         Integer[] numbers = Stream.of(reader.readLine().split(" ")).map(Integer::parseInt).toArray(Integer[]::new);
 
-        Arrays.sort(numbers, new Comparator<Integer>(){
-            public int compare(Integer i1, Integer i2){
-                Integer num1 = Math.abs(i1 % 2);
-                Integer num2 = Math.abs(i2 % 2);
+        Comparator<Integer> comparator = (n1,n2) -> {
+            Integer num1 = Math.abs(n1 % 2);
+            Integer num2 = Math.abs(n2 % 2);
+            return num1.compareTo(num2);
+        };
 
-                return num1.compareTo(num2);
-            }
-        });
+        Comparator<Integer> lastComparator = comparator.thenComparing((n1,n2) -> n1 - n2);
 
-        for (Integer num: numbers){
-            System.out.print(num + " ");
-        }
+        Arrays.stream(numbers)
+                .sorted(lastComparator)
+                .forEach(n -> System.out.print(n + " "));
     }
 }
